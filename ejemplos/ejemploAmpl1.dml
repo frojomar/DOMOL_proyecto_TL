@@ -1,0 +1,98 @@
+//Ejemplo de un programa básico en DOMOL
+//No tiene errores
+//Incluye la primera ampliación, la de los casios de uso
+
+VARIABLES	//Una variable entera, dos de tipo real y una de tipo lógico
+	temp_basica = 20		
+	temp_verano = temp_basica * 1.1
+	temp_invierno = temp_basica / 1.1
+	verano = falso
+	
+SENSORES
+	float T1,T2   	//miden la temperatura, devuelve float
+	int Reloj	//mide la hora en el reloj del sistema, devuelve int
+	bool S		//mide si el sistema está o no operativo, devuelve bool
+
+ACTUADORES
+	Calefaccion	//calefacción
+	A_C		//aire acondicionado
+	SYSTEM		//sistema domótico
+	
+
+ESTADOS
+	Inicial
+	Final
+	Todo_OFF	
+	C_ON
+	AC_ON
+	
+
+TRANSICIONES
+	iniciar:		Inicial  -> Todo_OFF	
+	encender_calef:		Todo_OFF -> C_ON
+	apagar_calef:		C_ON     -> Todo_OFF
+	encender_airea:		Todo_OFF -> AC_ON
+	apagar_airea:		AC_ON    -> Todo_OFF
+	acabar1:		Todo_OFF -> Final
+	acabar2:		C_ON     -> Final
+	acabar3:		AC_ON    -> Final
+
+COMPORTAMIENTO
+	Inicial [
+		si (verdadero == S)  [
+			activar SYSTEM
+			desactivar Calefaccion
+			desactivar A_C
+			transicion iniciar
+			]
+	]
+
+	Final [
+		desactivar Calefaccion
+		desactivar A_C
+		desactivar SYSTEM
+	]
+
+	Todo_OFF [
+		si  (falso == verano) && (T1 < temp_invierno)  [
+			activar Calefaccion
+	         	transicion encender_calef
+			]
+		si ((verdadero == verano) && (T2 > temp_verano))  [
+			activar A_C
+			transicion encender_airea
+			]
+		si (falso == S)  [
+			transicion acabar1
+			]
+
+	]
+	
+	C_ON [  
+		si T2 > temp_verano  [
+			desactivar Calefaccion
+			transicion apagar_calef
+		]
+		si (falso == S)  [
+			transicion acabar2
+			]
+	]
+	 
+	AC_ON [
+		si T1 < temp_invierno [
+			desactivar A_C
+			transicion apagar_airea
+		]
+		si (falso == S)  [
+			transicion acabar3
+			]
+	]
+
+
+CASOS DE USO
+CASO Invierno: Inicial; Todo_OFF; C_ON; Todo_OFF; C_ON; Todo_OFF; Final
+CASO Primavera: Inicial; Todo_OFF; Final
+
+
+
+

@@ -1,0 +1,98 @@
+//Ejemplo de un programa básico en DOMOL
+//Tiene errores sintácticos y semánticos. Los mensajes no tienen que ser idénticos a los comentarios que aparecen en el código
+//No incluye ampliaciones
+//Se puede utilizar para probar la fase I
+VARIABLES	
+	temp_basica = 20		
+	temp_verano = temp_basica * 1.1
+	temp_invierno = temp_basica / 1.1
+	verano = falso
+	temp_basica = 22.5    //línea 10: error semántico, la variable temp_basica no puede cambiar de tipo
+	
+SENSORES
+	float T1,T2   	//miden la temperatura, devuelve float
+	int Reloj	//mide la hora en el reloj del sistema, devuelve int
+	bool S		//mide si el sistema está o no operativo, devuelve bool
+	float T1	//línea 16: error semántico, el identificador T1 está duplicado
+
+ACTUADORES
+	Calefaccion	//calefacción
+	A_C		//aire acondicionado
+	SYSTEM		//sistema domótico
+	S		//línea 22: error semántico, el identificador S está duplicado
+
+ESTADOS
+	Inicial
+	Final
+	Todo_OFF	
+	C_ON
+	AC_ON
+	
+TRANSICIONES
+	iniciar:		Inicial  -> Todo_OF  	//línea 32: error semántico, Todo_OF no es un estado
+	encender_calef:		Todo_OFF -> C_ON
+	apagar_calef:		C_ON     -> Todo_OFF
+	encender_airea:		Todo_OFF -> AC_ON
+	apagar_airea:		AC_ON    -> Todo_OFF
+	acabar1:		Todo_OFF -> Final
+	acabar2:		C_ON     ; Final	//línea 38: error sintáctico
+	acabar2:		AC_ON    -> Final	//línea 39: error semántico, el identificador acabar2 está duplicado
+
+COMPORTAMIENTO
+	iniciar [		//línea 42: error semántico, iniciar no es un estado
+		si (verdadero == S)  [
+			activar SYSTEM
+			desactivar Calefaccion
+			desactivar A_C
+			transicion iniciar
+			]
+		sino			//línea 49: error sintáctico
+	]
+
+	Final [
+		desactivar Calefaccion
+		desactivar A_C
+		desactivar SYSTEM
+	]
+
+	Todo_OFF [
+		si  (falso == verano) && (T < temp_invierno)  [ //línea 59: error semántico, identficador T desconocido
+			activar Calefaccion
+	         	transicion encender_calef
+			]
+		si ((verdadero == verano) && (T2 > temp_verano))  [
+			activar A_C
+			transicion Calefaccion  //línea 65: error semántico, Calefaccion no es una transición
+			]
+		si (falso == S)  [
+			transicion acabar //línea 68: error semántico, identficador acabar desconocido
+			]
+
+	]
+	
+	C_ON [  
+		si T2 > temp_verano  [
+			desactivar Calefaccion
+			transicion apagar_calef
+		]
+		si (falso == S)  [
+			transicion acabar2
+			]
+	]
+	 
+	AC_ON [
+		si T1 < temp_invierno [
+			desactivar A_C
+			transicion apagar_airea
+		]
+		si (falso == S)  [
+			transicion acabar3
+			]
+	]
+
+
+
+
+
+
+

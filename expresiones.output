@@ -1,0 +1,3071 @@
+Gramática
+
+    0 $accept: programa $end
+
+    1 programa: %empty
+    2         | zona_variables zona_sensores zona_actuadores zona_estados zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos
+
+    3 zona_variables: VARIABLES '\n' zona_variables_instrucciones
+
+    4 zona_variables_instrucciones: %empty
+    5                             | zona_variables_instrucciones operacion_asignacion
+
+    6 operacion_asignacion: ID '=' expr '\n'
+    7                     | ID '=' exprLogica '\n'
+    8                     | error '\n'
+
+    9 exprLogica: LOGICA
+   10           | expr S_MENOR expr
+   11           | expr S_MENORIGUAL expr
+   12           | expr S_MAYOR expr
+   13           | expr S_MAYORIGUAL expr
+   14           | expr S_IGUAL expr
+   15           | expr S_DISTINTO expr
+   16           | LOGICA S_IGUAL id_logica
+   17           | LOGICA S_DISTINTO id_logica
+   18           | exprLogica S_OR exprLogica
+   19           | exprLogica S_AND exprLogica
+   20           | '(' exprLogica ')'
+   21           | S_NOT exprLogica
+
+   22 id_logica: ID
+
+   23 expr: REAL
+   24     | NUMERO
+   25     | ID
+   26     | expr '+' expr
+   27     | expr '-' expr
+   28     | expr '*' expr
+   29     | expr '/' expr
+   30     | expr '%' expr
+   31     | expr '^' expr
+   32     | '(' expr ')'
+   33     | '+' expr
+   34     | '-' expr
+
+   35 zona_sensores: SENSORES '\n' zona_sensores_instrucciones
+
+   36 zona_sensores_instrucciones: %empty
+   37                            | zona_sensores_instrucciones TIPO_ENTERO identificadores_sensores_enteros '\n'
+   38                            | zona_sensores_instrucciones TIPO_REAL identificadores_sensores_reales '\n'
+   39                            | zona_sensores_instrucciones TIPO_BOOL identificadores_sensores_bool '\n'
+   40                            | zona_sensores_instrucciones error '\n'
+
+   41 identificadores_sensores_enteros: ID
+   42                                 | ID ',' identificadores_sensores_enteros
+
+   43 identificadores_sensores_reales: ID
+   44                                | ID ',' identificadores_sensores_reales
+
+   45 identificadores_sensores_bool: ID
+   46                              | ID ',' identificadores_sensores_bool
+
+   47 zona_actuadores: ACTUADORES '\n' zona_actuadores_instrucciones
+
+   48 zona_actuadores_instrucciones: %empty
+   49                              | zona_actuadores_instrucciones ID '\n'
+   50                              | zona_actuadores_instrucciones error '\n'
+
+   51 zona_estados: ESTADOS '\n' zona_estados_instrucciones
+
+   52 zona_estados_instrucciones: %empty
+   53                           | zona_estados_instrucciones ID '\n'
+   54                           | zona_estados_instrucciones error '\n'
+
+   55 zona_transiciones: TRANSICIONES '\n' zona_transiciones_instrucciones
+
+   56 zona_transiciones_instrucciones: %empty
+   57                                | zona_transiciones_instrucciones ID ':' ID ASIGNACION ID '\n'
+   58                                | zona_transiciones_instrucciones error '\n'
+
+   59 zona_casos_uso: CASOSUSO '\n' zona_casos_uso_instrucciones
+   60               | %empty
+
+   61 zona_casos_uso_instrucciones: %empty
+   62                             | zona_casos_uso_instrucciones CASO ID ':' caso_uso2
+   63                             | zona_casos_uso_instrucciones error '\n'
+
+   64 caso_uso2: ID '\n'
+   65          | ID ';' caso_uso2
+
+   66 zona_comportamiento: COMPORTAMIENTO '\n' zona_comportamiento_instrucciones
+
+   67 zona_comportamiento_instrucciones: %empty
+
+   68 $@1: %empty
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES '\n' comportamiento2 FINLLAVES '\n'
+   70                                  | zona_comportamiento_instrucciones error '\n'
+
+   71 $@2: %empty
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+   73                | comportamiento2 ACTIVAR ID '\n'
+   74                | comportamiento2 DESACTIVAR ID '\n'
+   75                | comportamiento2 TRANSICION ID '\n'
+   76                | comportamiento2 operacion_asignacion_arbol
+   77                | %empty
+   78                | comportamiento2 error '\n'
+
+   79 comportamiento3: %empty
+
+   80 $@3: %empty
+
+   81 comportamiento3: SINO INICIOLLAVES $@3 '\n' comportamiento2 FINLLAVES '\n'
+   82                | SINO error
+
+   83 zona_ejemplos: EJEMPLOS '\n' zona_ejemplos_instrucciones
+   84              | %empty
+
+   85 zona_ejemplos_instrucciones: %empty
+   86                            | zona_ejemplos_instrucciones EJEMPLO ID '\n' ejemplos2
+   87                            | zona_ejemplos_instrucciones error '\n'
+
+   88 ejemplos2: %empty
+   89          | ejemplos2 ID LOGICA '\n'
+   90          | ejemplos2 ID NUMERO '\n'
+   91          | ejemplos2 ID REAL '\n'
+
+   92 operacion_asignacion_arbol: ID '=' expr_arbol '\n'
+   93                           | ID '=' exprLogica_arbol '\n'
+
+   94 exprLogica_arbol: LOGICA
+   95                 | expr_arbol S_MENOR expr_arbol
+   96                 | expr_arbol S_MENORIGUAL expr_arbol
+   97                 | expr_arbol S_MAYOR expr_arbol
+   98                 | expr_arbol S_MAYORIGUAL expr_arbol
+   99                 | expr_arbol S_IGUAL expr_arbol
+  100                 | expr_arbol S_DISTINTO expr_arbol
+  101                 | exprLogica_arbol S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol S_OR exprLogica_arbol
+  104                 | exprLogica_arbol S_AND exprLogica_arbol
+  105                 | '(' exprLogica_arbol ')'
+  106                 | S_NOT exprLogica_arbol
+
+  107 id_logica_arbol: ID
+
+  108 expr_arbol: REAL
+  109           | NUMERO
+  110           | ID
+  111           | expr_arbol '+' expr_arbol
+  112           | expr_arbol '-' expr_arbol
+  113           | expr_arbol '*' expr_arbol
+  114           | expr_arbol '/' expr_arbol
+  115           | expr_arbol '%' expr_arbol
+  116           | expr_arbol '^' expr_arbol
+  117           | '(' expr_arbol ')'
+  118           | '+' expr_arbol
+  119           | '-' expr_arbol
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+'\n' (10) 3 6 7 8 35 37 38 39 40 47 49 50 51 53 54 55 57 58 59 63 64
+    66 69 70 72 73 74 75 78 81 83 86 87 89 90 91 92 93
+'%' (37) 30 115
+'(' (40) 20 32 105 117
+')' (41) 20 32 105 117
+'*' (42) 28 113
+'+' (43) 26 33 111 118
+',' (44) 42 44 46
+'-' (45) 27 34 112 119
+'/' (47) 29 114
+':' (58) 57 62
+';' (59) 65
+'=' (61) 6 7 92 93
+'^' (94) 31 116
+error (256) 8 40 50 54 58 63 70 78 82 87
+NUMERO (258) 24 90 109
+REAL (259) 23 91 108
+ID (260) 6 7 22 25 41 42 43 44 45 46 49 53 57 62 64 65 69 73 74 75
+    86 89 90 91 92 93 107 110
+LOGICA (261) 9 16 17 89 94
+TIPO_REAL (262) 38
+TIPO_ENTERO (263) 37
+TIPO_BOOL (264) 39
+VARIABLES (265) 3
+SENSORES (266) 35
+ACTUADORES (267) 47
+ESTADOS (268) 51
+TRANSICIONES (269) 55
+COMPORTAMIENTO (270) 66
+SI (271) 72
+SINO (272) 81 82
+ACTIVAR (273) 73
+DESACTIVAR (274) 74
+TRANSICION (275) 75
+ASIGNACION (276) 57
+CASO (277) 62
+CASOSUSO (278) 59
+EJEMPLO (279) 86
+EJEMPLOS (280) 83
+INICIOLLAVES (281) 69 72 81
+FINLLAVES (282) 69 72 81
+S_MENORIGUAL (283) 11 96
+S_MAYORIGUAL (284) 13 98
+S_MENOR (285) 10 95
+S_MAYOR (286) 12 97
+S_IGUAL (287) 14 16 99 101
+S_DISTINTO (288) 15 17 100 102
+S_AND (289) 19 104
+S_OR (290) 18 103
+S_NOT (291) 21 106
+menosunario (292)
+masunario (293)
+
+
+No terminales con las reglas donde aparecen
+
+$accept (52)
+    en la izquierda: 0
+programa (53)
+    en la izquierda: 1 2, en la derecha: 0
+zona_variables (54)
+    en la izquierda: 3, en la derecha: 2
+zona_variables_instrucciones (55)
+    en la izquierda: 4 5, en la derecha: 3 5
+operacion_asignacion (56)
+    en la izquierda: 6 7 8, en la derecha: 5
+exprLogica (57)
+    en la izquierda: 9 10 11 12 13 14 15 16 17 18 19 20 21, en la derecha:
+    7 18 19 20 21
+id_logica (58)
+    en la izquierda: 22, en la derecha: 16 17
+expr (59)
+    en la izquierda: 23 24 25 26 27 28 29 30 31 32 33 34, en la derecha:
+    6 10 11 12 13 14 15 26 27 28 29 30 31 32 33 34
+zona_sensores (60)
+    en la izquierda: 35, en la derecha: 2
+zona_sensores_instrucciones (61)
+    en la izquierda: 36 37 38 39 40, en la derecha: 35 37 38 39 40
+identificadores_sensores_enteros (62)
+    en la izquierda: 41 42, en la derecha: 37 42
+identificadores_sensores_reales (63)
+    en la izquierda: 43 44, en la derecha: 38 44
+identificadores_sensores_bool (64)
+    en la izquierda: 45 46, en la derecha: 39 46
+zona_actuadores (65)
+    en la izquierda: 47, en la derecha: 2
+zona_actuadores_instrucciones (66)
+    en la izquierda: 48 49 50, en la derecha: 47 49 50
+zona_estados (67)
+    en la izquierda: 51, en la derecha: 2
+zona_estados_instrucciones (68)
+    en la izquierda: 52 53 54, en la derecha: 51 53 54
+zona_transiciones (69)
+    en la izquierda: 55, en la derecha: 2
+zona_transiciones_instrucciones (70)
+    en la izquierda: 56 57 58, en la derecha: 55 57 58
+zona_casos_uso (71)
+    en la izquierda: 59 60, en la derecha: 2
+zona_casos_uso_instrucciones (72)
+    en la izquierda: 61 62 63, en la derecha: 59 62 63
+caso_uso2 (73)
+    en la izquierda: 64 65, en la derecha: 62 65
+zona_comportamiento (74)
+    en la izquierda: 66, en la derecha: 2
+zona_comportamiento_instrucciones (75)
+    en la izquierda: 67 69 70, en la derecha: 66 69 70
+$@1 (76)
+    en la izquierda: 68, en la derecha: 69
+comportamiento2 (77)
+    en la izquierda: 72 73 74 75 76 77 78, en la derecha: 69 72 73
+    74 75 76 78 81
+$@2 (78)
+    en la izquierda: 71, en la derecha: 72
+comportamiento3 (79)
+    en la izquierda: 79 81 82, en la derecha: 72
+$@3 (80)
+    en la izquierda: 80, en la derecha: 81
+zona_ejemplos (81)
+    en la izquierda: 83 84, en la derecha: 2
+zona_ejemplos_instrucciones (82)
+    en la izquierda: 85 86 87, en la derecha: 83 86 87
+ejemplos2 (83)
+    en la izquierda: 88 89 90 91, en la derecha: 86 89 90 91
+operacion_asignacion_arbol (84)
+    en la izquierda: 92 93, en la derecha: 76
+exprLogica_arbol (85)
+    en la izquierda: 94 95 96 97 98 99 100 101 102 103 104 105 106,
+    en la derecha: 72 93 101 102 103 104 105 106
+id_logica_arbol (86)
+    en la izquierda: 107, en la derecha: 101 102
+expr_arbol (87)
+    en la izquierda: 108 109 110 111 112 113 114 115 116 117 118 119,
+    en la derecha: 92 95 96 97 98 99 100 111 112 113 114 115 116 117
+    118 119
+
+
+Estado 0
+
+    0 $accept: . programa $end
+
+    VARIABLES  desplazar e ir al estado 1
+
+    $default  reduce usando la regla 1 (programa)
+
+    programa        ir al estado 2
+    zona_variables  ir al estado 3
+
+
+Estado 1
+
+    3 zona_variables: VARIABLES . '\n' zona_variables_instrucciones
+
+    '\n'  desplazar e ir al estado 4
+
+
+Estado 2
+
+    0 $accept: programa . $end
+
+    $end  desplazar e ir al estado 5
+
+
+Estado 3
+
+    2 programa: zona_variables . zona_sensores zona_actuadores zona_estados zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos
+
+    SENSORES  desplazar e ir al estado 6
+
+    zona_sensores  ir al estado 7
+
+
+Estado 4
+
+    3 zona_variables: VARIABLES '\n' . zona_variables_instrucciones
+
+    $default  reduce usando la regla 4 (zona_variables_instrucciones)
+
+    zona_variables_instrucciones  ir al estado 8
+
+
+Estado 5
+
+    0 $accept: programa $end .
+
+    $default  aceptar
+
+
+Estado 6
+
+   35 zona_sensores: SENSORES . '\n' zona_sensores_instrucciones
+
+    '\n'  desplazar e ir al estado 9
+
+
+Estado 7
+
+    2 programa: zona_variables zona_sensores . zona_actuadores zona_estados zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos
+
+    ACTUADORES  desplazar e ir al estado 10
+
+    zona_actuadores  ir al estado 11
+
+
+Estado 8
+
+    3 zona_variables: VARIABLES '\n' zona_variables_instrucciones .
+    5 zona_variables_instrucciones: zona_variables_instrucciones . operacion_asignacion
+
+    error  desplazar e ir al estado 12
+    ID     desplazar e ir al estado 13
+
+    SENSORES  reduce usando la regla 3 (zona_variables)
+
+    operacion_asignacion  ir al estado 14
+
+
+Estado 9
+
+   35 zona_sensores: SENSORES '\n' . zona_sensores_instrucciones
+
+    $default  reduce usando la regla 36 (zona_sensores_instrucciones)
+
+    zona_sensores_instrucciones  ir al estado 15
+
+
+Estado 10
+
+   47 zona_actuadores: ACTUADORES . '\n' zona_actuadores_instrucciones
+
+    '\n'  desplazar e ir al estado 16
+
+
+Estado 11
+
+    2 programa: zona_variables zona_sensores zona_actuadores . zona_estados zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos
+
+    ESTADOS  desplazar e ir al estado 17
+
+    zona_estados  ir al estado 18
+
+
+Estado 12
+
+    8 operacion_asignacion: error . '\n'
+
+    '\n'  desplazar e ir al estado 19
+
+
+Estado 13
+
+    6 operacion_asignacion: ID . '=' expr '\n'
+    7                     | ID . '=' exprLogica '\n'
+
+    '='  desplazar e ir al estado 20
+
+
+Estado 14
+
+    5 zona_variables_instrucciones: zona_variables_instrucciones operacion_asignacion .
+
+    $default  reduce usando la regla 5 (zona_variables_instrucciones)
+
+
+Estado 15
+
+   35 zona_sensores: SENSORES '\n' zona_sensores_instrucciones .
+   37 zona_sensores_instrucciones: zona_sensores_instrucciones . TIPO_ENTERO identificadores_sensores_enteros '\n'
+   38                            | zona_sensores_instrucciones . TIPO_REAL identificadores_sensores_reales '\n'
+   39                            | zona_sensores_instrucciones . TIPO_BOOL identificadores_sensores_bool '\n'
+   40                            | zona_sensores_instrucciones . error '\n'
+
+    error        desplazar e ir al estado 21
+    TIPO_REAL    desplazar e ir al estado 22
+    TIPO_ENTERO  desplazar e ir al estado 23
+    TIPO_BOOL    desplazar e ir al estado 24
+
+    ACTUADORES  reduce usando la regla 35 (zona_sensores)
+
+
+Estado 16
+
+   47 zona_actuadores: ACTUADORES '\n' . zona_actuadores_instrucciones
+
+    $default  reduce usando la regla 48 (zona_actuadores_instrucciones)
+
+    zona_actuadores_instrucciones  ir al estado 25
+
+
+Estado 17
+
+   51 zona_estados: ESTADOS . '\n' zona_estados_instrucciones
+
+    '\n'  desplazar e ir al estado 26
+
+
+Estado 18
+
+    2 programa: zona_variables zona_sensores zona_actuadores zona_estados . zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos
+
+    TRANSICIONES  desplazar e ir al estado 27
+
+    zona_transiciones  ir al estado 28
+
+
+Estado 19
+
+    8 operacion_asignacion: error '\n' .
+
+    $default  reduce usando la regla 8 (operacion_asignacion)
+
+
+Estado 20
+
+    6 operacion_asignacion: ID '=' . expr '\n'
+    7                     | ID '=' . exprLogica '\n'
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    LOGICA  desplazar e ir al estado 32
+    S_NOT   desplazar e ir al estado 33
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 36
+
+    exprLogica  ir al estado 37
+    expr        ir al estado 38
+
+
+Estado 21
+
+   40 zona_sensores_instrucciones: zona_sensores_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 39
+
+
+Estado 22
+
+   38 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_REAL . identificadores_sensores_reales '\n'
+
+    ID  desplazar e ir al estado 40
+
+    identificadores_sensores_reales  ir al estado 41
+
+
+Estado 23
+
+   37 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_ENTERO . identificadores_sensores_enteros '\n'
+
+    ID  desplazar e ir al estado 42
+
+    identificadores_sensores_enteros  ir al estado 43
+
+
+Estado 24
+
+   39 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_BOOL . identificadores_sensores_bool '\n'
+
+    ID  desplazar e ir al estado 44
+
+    identificadores_sensores_bool  ir al estado 45
+
+
+Estado 25
+
+   47 zona_actuadores: ACTUADORES '\n' zona_actuadores_instrucciones .
+   49 zona_actuadores_instrucciones: zona_actuadores_instrucciones . ID '\n'
+   50                              | zona_actuadores_instrucciones . error '\n'
+
+    error  desplazar e ir al estado 46
+    ID     desplazar e ir al estado 47
+
+    ESTADOS  reduce usando la regla 47 (zona_actuadores)
+
+
+Estado 26
+
+   51 zona_estados: ESTADOS '\n' . zona_estados_instrucciones
+
+    $default  reduce usando la regla 52 (zona_estados_instrucciones)
+
+    zona_estados_instrucciones  ir al estado 48
+
+
+Estado 27
+
+   55 zona_transiciones: TRANSICIONES . '\n' zona_transiciones_instrucciones
+
+    '\n'  desplazar e ir al estado 49
+
+
+Estado 28
+
+    2 programa: zona_variables zona_sensores zona_actuadores zona_estados zona_transiciones . zona_comportamiento zona_casos_uso zona_ejemplos
+
+    COMPORTAMIENTO  desplazar e ir al estado 50
+
+    zona_comportamiento  ir al estado 51
+
+
+Estado 29
+
+   24 expr: NUMERO .
+
+    $default  reduce usando la regla 24 (expr)
+
+
+Estado 30
+
+   23 expr: REAL .
+
+    $default  reduce usando la regla 23 (expr)
+
+
+Estado 31
+
+   25 expr: ID .
+
+    $default  reduce usando la regla 25 (expr)
+
+
+Estado 32
+
+    9 exprLogica: LOGICA .
+   16           | LOGICA . S_IGUAL id_logica
+   17           | LOGICA . S_DISTINTO id_logica
+
+    S_IGUAL     desplazar e ir al estado 52
+    S_DISTINTO  desplazar e ir al estado 53
+
+    $default  reduce usando la regla 9 (exprLogica)
+
+
+Estado 33
+
+   21 exprLogica: S_NOT . exprLogica
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    LOGICA  desplazar e ir al estado 32
+    S_NOT   desplazar e ir al estado 33
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 36
+
+    exprLogica  ir al estado 54
+    expr        ir al estado 55
+
+
+Estado 34
+
+   33 expr: '+' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 57
+
+
+Estado 35
+
+   34 expr: '-' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 58
+
+
+Estado 36
+
+   20 exprLogica: '(' . exprLogica ')'
+   32 expr: '(' . expr ')'
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    LOGICA  desplazar e ir al estado 32
+    S_NOT   desplazar e ir al estado 33
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 36
+
+    exprLogica  ir al estado 59
+    expr        ir al estado 60
+
+
+Estado 37
+
+    7 operacion_asignacion: ID '=' exprLogica . '\n'
+   18 exprLogica: exprLogica . S_OR exprLogica
+   19           | exprLogica . S_AND exprLogica
+
+    S_AND  desplazar e ir al estado 61
+    S_OR   desplazar e ir al estado 62
+    '\n'   desplazar e ir al estado 63
+
+
+Estado 38
+
+    6 operacion_asignacion: ID '=' expr . '\n'
+   10 exprLogica: expr . S_MENOR expr
+   11           | expr . S_MENORIGUAL expr
+   12           | expr . S_MAYOR expr
+   13           | expr . S_MAYORIGUAL expr
+   14           | expr . S_IGUAL expr
+   15           | expr . S_DISTINTO expr
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    S_MENORIGUAL  desplazar e ir al estado 64
+    S_MAYORIGUAL  desplazar e ir al estado 65
+    S_MENOR       desplazar e ir al estado 66
+    S_MAYOR       desplazar e ir al estado 67
+    S_IGUAL       desplazar e ir al estado 68
+    S_DISTINTO    desplazar e ir al estado 69
+    '+'           desplazar e ir al estado 70
+    '-'           desplazar e ir al estado 71
+    '*'           desplazar e ir al estado 72
+    '/'           desplazar e ir al estado 73
+    '%'           desplazar e ir al estado 74
+    '^'           desplazar e ir al estado 75
+    '\n'          desplazar e ir al estado 76
+
+
+Estado 39
+
+   40 zona_sensores_instrucciones: zona_sensores_instrucciones error '\n' .
+
+    $default  reduce usando la regla 40 (zona_sensores_instrucciones)
+
+
+Estado 40
+
+   43 identificadores_sensores_reales: ID .
+   44                                | ID . ',' identificadores_sensores_reales
+
+    ','  desplazar e ir al estado 77
+
+    $default  reduce usando la regla 43 (identificadores_sensores_reales)
+
+
+Estado 41
+
+   38 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_REAL identificadores_sensores_reales . '\n'
+
+    '\n'  desplazar e ir al estado 78
+
+
+Estado 42
+
+   41 identificadores_sensores_enteros: ID .
+   42                                 | ID . ',' identificadores_sensores_enteros
+
+    ','  desplazar e ir al estado 79
+
+    $default  reduce usando la regla 41 (identificadores_sensores_enteros)
+
+
+Estado 43
+
+   37 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_ENTERO identificadores_sensores_enteros . '\n'
+
+    '\n'  desplazar e ir al estado 80
+
+
+Estado 44
+
+   45 identificadores_sensores_bool: ID .
+   46                              | ID . ',' identificadores_sensores_bool
+
+    ','  desplazar e ir al estado 81
+
+    $default  reduce usando la regla 45 (identificadores_sensores_bool)
+
+
+Estado 45
+
+   39 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_BOOL identificadores_sensores_bool . '\n'
+
+    '\n'  desplazar e ir al estado 82
+
+
+Estado 46
+
+   50 zona_actuadores_instrucciones: zona_actuadores_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 83
+
+
+Estado 47
+
+   49 zona_actuadores_instrucciones: zona_actuadores_instrucciones ID . '\n'
+
+    '\n'  desplazar e ir al estado 84
+
+
+Estado 48
+
+   51 zona_estados: ESTADOS '\n' zona_estados_instrucciones .
+   53 zona_estados_instrucciones: zona_estados_instrucciones . ID '\n'
+   54                           | zona_estados_instrucciones . error '\n'
+
+    error  desplazar e ir al estado 85
+    ID     desplazar e ir al estado 86
+
+    TRANSICIONES  reduce usando la regla 51 (zona_estados)
+
+
+Estado 49
+
+   55 zona_transiciones: TRANSICIONES '\n' . zona_transiciones_instrucciones
+
+    $default  reduce usando la regla 56 (zona_transiciones_instrucciones)
+
+    zona_transiciones_instrucciones  ir al estado 87
+
+
+Estado 50
+
+   66 zona_comportamiento: COMPORTAMIENTO . '\n' zona_comportamiento_instrucciones
+
+    '\n'  desplazar e ir al estado 88
+
+
+Estado 51
+
+    2 programa: zona_variables zona_sensores zona_actuadores zona_estados zona_transiciones zona_comportamiento . zona_casos_uso zona_ejemplos
+
+    CASOSUSO  desplazar e ir al estado 89
+
+    $default  reduce usando la regla 60 (zona_casos_uso)
+
+    zona_casos_uso  ir al estado 90
+
+
+Estado 52
+
+   16 exprLogica: LOGICA S_IGUAL . id_logica
+
+    ID  desplazar e ir al estado 91
+
+    id_logica  ir al estado 92
+
+
+Estado 53
+
+   17 exprLogica: LOGICA S_DISTINTO . id_logica
+
+    ID  desplazar e ir al estado 91
+
+    id_logica  ir al estado 93
+
+
+Estado 54
+
+   18 exprLogica: exprLogica . S_OR exprLogica
+   19           | exprLogica . S_AND exprLogica
+   21           | S_NOT exprLogica .
+
+    $default  reduce usando la regla 21 (exprLogica)
+
+
+Estado 55
+
+   10 exprLogica: expr . S_MENOR expr
+   11           | expr . S_MENORIGUAL expr
+   12           | expr . S_MAYOR expr
+   13           | expr . S_MAYORIGUAL expr
+   14           | expr . S_IGUAL expr
+   15           | expr . S_DISTINTO expr
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    S_MENORIGUAL  desplazar e ir al estado 64
+    S_MAYORIGUAL  desplazar e ir al estado 65
+    S_MENOR       desplazar e ir al estado 66
+    S_MAYOR       desplazar e ir al estado 67
+    S_IGUAL       desplazar e ir al estado 68
+    S_DISTINTO    desplazar e ir al estado 69
+    '+'           desplazar e ir al estado 70
+    '-'           desplazar e ir al estado 71
+    '*'           desplazar e ir al estado 72
+    '/'           desplazar e ir al estado 73
+    '%'           desplazar e ir al estado 74
+    '^'           desplazar e ir al estado 75
+
+
+Estado 56
+
+   32 expr: '(' . expr ')'
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 94
+
+
+Estado 57
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+   33     | '+' expr .
+
+    $default  reduce usando la regla 33 (expr)
+
+
+Estado 58
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+   34     | '-' expr .
+
+    $default  reduce usando la regla 34 (expr)
+
+
+Estado 59
+
+   18 exprLogica: exprLogica . S_OR exprLogica
+   19           | exprLogica . S_AND exprLogica
+   20           | '(' exprLogica . ')'
+
+    S_AND  desplazar e ir al estado 61
+    S_OR   desplazar e ir al estado 62
+    ')'    desplazar e ir al estado 95
+
+
+Estado 60
+
+   10 exprLogica: expr . S_MENOR expr
+   11           | expr . S_MENORIGUAL expr
+   12           | expr . S_MAYOR expr
+   13           | expr . S_MAYORIGUAL expr
+   14           | expr . S_IGUAL expr
+   15           | expr . S_DISTINTO expr
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+   32     | '(' expr . ')'
+
+    S_MENORIGUAL  desplazar e ir al estado 64
+    S_MAYORIGUAL  desplazar e ir al estado 65
+    S_MENOR       desplazar e ir al estado 66
+    S_MAYOR       desplazar e ir al estado 67
+    S_IGUAL       desplazar e ir al estado 68
+    S_DISTINTO    desplazar e ir al estado 69
+    '+'           desplazar e ir al estado 70
+    '-'           desplazar e ir al estado 71
+    '*'           desplazar e ir al estado 72
+    '/'           desplazar e ir al estado 73
+    '%'           desplazar e ir al estado 74
+    '^'           desplazar e ir al estado 75
+    ')'           desplazar e ir al estado 96
+
+
+Estado 61
+
+   19 exprLogica: exprLogica S_AND . exprLogica
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    LOGICA  desplazar e ir al estado 32
+    S_NOT   desplazar e ir al estado 33
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 36
+
+    exprLogica  ir al estado 97
+    expr        ir al estado 55
+
+
+Estado 62
+
+   18 exprLogica: exprLogica S_OR . exprLogica
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    LOGICA  desplazar e ir al estado 32
+    S_NOT   desplazar e ir al estado 33
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 36
+
+    exprLogica  ir al estado 98
+    expr        ir al estado 55
+
+
+Estado 63
+
+    7 operacion_asignacion: ID '=' exprLogica '\n' .
+
+    $default  reduce usando la regla 7 (operacion_asignacion)
+
+
+Estado 64
+
+   11 exprLogica: expr S_MENORIGUAL . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 99
+
+
+Estado 65
+
+   13 exprLogica: expr S_MAYORIGUAL . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 100
+
+
+Estado 66
+
+   10 exprLogica: expr S_MENOR . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 101
+
+
+Estado 67
+
+   12 exprLogica: expr S_MAYOR . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 102
+
+
+Estado 68
+
+   14 exprLogica: expr S_IGUAL . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 103
+
+
+Estado 69
+
+   15 exprLogica: expr S_DISTINTO . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 104
+
+
+Estado 70
+
+   26 expr: expr '+' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 105
+
+
+Estado 71
+
+   27 expr: expr '-' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 106
+
+
+Estado 72
+
+   28 expr: expr '*' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 107
+
+
+Estado 73
+
+   29 expr: expr '/' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 108
+
+
+Estado 74
+
+   30 expr: expr '%' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 109
+
+
+Estado 75
+
+   31 expr: expr '^' . expr
+
+    NUMERO  desplazar e ir al estado 29
+    REAL    desplazar e ir al estado 30
+    ID      desplazar e ir al estado 31
+    '+'     desplazar e ir al estado 34
+    '-'     desplazar e ir al estado 35
+    '('     desplazar e ir al estado 56
+
+    expr  ir al estado 110
+
+
+Estado 76
+
+    6 operacion_asignacion: ID '=' expr '\n' .
+
+    $default  reduce usando la regla 6 (operacion_asignacion)
+
+
+Estado 77
+
+   44 identificadores_sensores_reales: ID ',' . identificadores_sensores_reales
+
+    ID  desplazar e ir al estado 40
+
+    identificadores_sensores_reales  ir al estado 111
+
+
+Estado 78
+
+   38 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_REAL identificadores_sensores_reales '\n' .
+
+    $default  reduce usando la regla 38 (zona_sensores_instrucciones)
+
+
+Estado 79
+
+   42 identificadores_sensores_enteros: ID ',' . identificadores_sensores_enteros
+
+    ID  desplazar e ir al estado 42
+
+    identificadores_sensores_enteros  ir al estado 112
+
+
+Estado 80
+
+   37 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_ENTERO identificadores_sensores_enteros '\n' .
+
+    $default  reduce usando la regla 37 (zona_sensores_instrucciones)
+
+
+Estado 81
+
+   46 identificadores_sensores_bool: ID ',' . identificadores_sensores_bool
+
+    ID  desplazar e ir al estado 44
+
+    identificadores_sensores_bool  ir al estado 113
+
+
+Estado 82
+
+   39 zona_sensores_instrucciones: zona_sensores_instrucciones TIPO_BOOL identificadores_sensores_bool '\n' .
+
+    $default  reduce usando la regla 39 (zona_sensores_instrucciones)
+
+
+Estado 83
+
+   50 zona_actuadores_instrucciones: zona_actuadores_instrucciones error '\n' .
+
+    $default  reduce usando la regla 50 (zona_actuadores_instrucciones)
+
+
+Estado 84
+
+   49 zona_actuadores_instrucciones: zona_actuadores_instrucciones ID '\n' .
+
+    $default  reduce usando la regla 49 (zona_actuadores_instrucciones)
+
+
+Estado 85
+
+   54 zona_estados_instrucciones: zona_estados_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 114
+
+
+Estado 86
+
+   53 zona_estados_instrucciones: zona_estados_instrucciones ID . '\n'
+
+    '\n'  desplazar e ir al estado 115
+
+
+Estado 87
+
+   55 zona_transiciones: TRANSICIONES '\n' zona_transiciones_instrucciones .
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones . ID ':' ID ASIGNACION ID '\n'
+   58                                | zona_transiciones_instrucciones . error '\n'
+
+    error  desplazar e ir al estado 116
+    ID     desplazar e ir al estado 117
+
+    COMPORTAMIENTO  reduce usando la regla 55 (zona_transiciones)
+
+
+Estado 88
+
+   66 zona_comportamiento: COMPORTAMIENTO '\n' . zona_comportamiento_instrucciones
+
+    $default  reduce usando la regla 67 (zona_comportamiento_instrucciones)
+
+    zona_comportamiento_instrucciones  ir al estado 118
+
+
+Estado 89
+
+   59 zona_casos_uso: CASOSUSO . '\n' zona_casos_uso_instrucciones
+
+    '\n'  desplazar e ir al estado 119
+
+
+Estado 90
+
+    2 programa: zona_variables zona_sensores zona_actuadores zona_estados zona_transiciones zona_comportamiento zona_casos_uso . zona_ejemplos
+
+    EJEMPLOS  desplazar e ir al estado 120
+
+    $default  reduce usando la regla 84 (zona_ejemplos)
+
+    zona_ejemplos  ir al estado 121
+
+
+Estado 91
+
+   22 id_logica: ID .
+
+    $default  reduce usando la regla 22 (id_logica)
+
+
+Estado 92
+
+   16 exprLogica: LOGICA S_IGUAL id_logica .
+
+    $default  reduce usando la regla 16 (exprLogica)
+
+
+Estado 93
+
+   17 exprLogica: LOGICA S_DISTINTO id_logica .
+
+    $default  reduce usando la regla 17 (exprLogica)
+
+
+Estado 94
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+   32     | '(' expr . ')'
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+    ')'  desplazar e ir al estado 96
+
+
+Estado 95
+
+   20 exprLogica: '(' exprLogica ')' .
+
+    $default  reduce usando la regla 20 (exprLogica)
+
+
+Estado 96
+
+   32 expr: '(' expr ')' .
+
+    $default  reduce usando la regla 32 (expr)
+
+
+Estado 97
+
+   18 exprLogica: exprLogica . S_OR exprLogica
+   19           | exprLogica . S_AND exprLogica
+   19           | exprLogica S_AND exprLogica .
+
+    $default  reduce usando la regla 19 (exprLogica)
+
+
+Estado 98
+
+   18 exprLogica: exprLogica . S_OR exprLogica
+   18           | exprLogica S_OR exprLogica .
+   19           | exprLogica . S_AND exprLogica
+
+    S_AND  desplazar e ir al estado 61
+
+    $default  reduce usando la regla 18 (exprLogica)
+
+
+Estado 99
+
+   11 exprLogica: expr S_MENORIGUAL expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 11 (exprLogica)
+
+
+Estado 100
+
+   13 exprLogica: expr S_MAYORIGUAL expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 13 (exprLogica)
+
+
+Estado 101
+
+   10 exprLogica: expr S_MENOR expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 10 (exprLogica)
+
+
+Estado 102
+
+   12 exprLogica: expr S_MAYOR expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 12 (exprLogica)
+
+
+Estado 103
+
+   14 exprLogica: expr S_IGUAL expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 14 (exprLogica)
+
+
+Estado 104
+
+   15 exprLogica: expr S_DISTINTO expr .
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '+'  desplazar e ir al estado 70
+    '-'  desplazar e ir al estado 71
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 15 (exprLogica)
+
+
+Estado 105
+
+   26 expr: expr . '+' expr
+   26     | expr '+' expr .
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 26 (expr)
+
+
+Estado 106
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   27     | expr '-' expr .
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '*'  desplazar e ir al estado 72
+    '/'  desplazar e ir al estado 73
+    '%'  desplazar e ir al estado 74
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 27 (expr)
+
+
+Estado 107
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   28     | expr '*' expr .
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 28 (expr)
+
+
+Estado 108
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   29     | expr '/' expr .
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 29 (expr)
+
+
+Estado 109
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   30     | expr '%' expr .
+   31     | expr . '^' expr
+
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 30 (expr)
+
+
+Estado 110
+
+   26 expr: expr . '+' expr
+   27     | expr . '-' expr
+   28     | expr . '*' expr
+   29     | expr . '/' expr
+   30     | expr . '%' expr
+   31     | expr . '^' expr
+   31     | expr '^' expr .
+
+    '^'  desplazar e ir al estado 75
+
+    $default  reduce usando la regla 31 (expr)
+
+
+Estado 111
+
+   44 identificadores_sensores_reales: ID ',' identificadores_sensores_reales .
+
+    $default  reduce usando la regla 44 (identificadores_sensores_reales)
+
+
+Estado 112
+
+   42 identificadores_sensores_enteros: ID ',' identificadores_sensores_enteros .
+
+    $default  reduce usando la regla 42 (identificadores_sensores_enteros)
+
+
+Estado 113
+
+   46 identificadores_sensores_bool: ID ',' identificadores_sensores_bool .
+
+    $default  reduce usando la regla 46 (identificadores_sensores_bool)
+
+
+Estado 114
+
+   54 zona_estados_instrucciones: zona_estados_instrucciones error '\n' .
+
+    $default  reduce usando la regla 54 (zona_estados_instrucciones)
+
+
+Estado 115
+
+   53 zona_estados_instrucciones: zona_estados_instrucciones ID '\n' .
+
+    $default  reduce usando la regla 53 (zona_estados_instrucciones)
+
+
+Estado 116
+
+   58 zona_transiciones_instrucciones: zona_transiciones_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 122
+
+
+Estado 117
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID . ':' ID ASIGNACION ID '\n'
+
+    ':'  desplazar e ir al estado 123
+
+
+Estado 118
+
+   66 zona_comportamiento: COMPORTAMIENTO '\n' zona_comportamiento_instrucciones .
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones . ID $@1 INICIOLLAVES '\n' comportamiento2 FINLLAVES '\n'
+   70                                  | zona_comportamiento_instrucciones . error '\n'
+
+    error  desplazar e ir al estado 124
+    ID     desplazar e ir al estado 125
+
+    $end      reduce usando la regla 66 (zona_comportamiento)
+    CASOSUSO  reduce usando la regla 66 (zona_comportamiento)
+    EJEMPLOS  reduce usando la regla 66 (zona_comportamiento)
+
+
+Estado 119
+
+   59 zona_casos_uso: CASOSUSO '\n' . zona_casos_uso_instrucciones
+
+    $default  reduce usando la regla 61 (zona_casos_uso_instrucciones)
+
+    zona_casos_uso_instrucciones  ir al estado 126
+
+
+Estado 120
+
+   83 zona_ejemplos: EJEMPLOS . '\n' zona_ejemplos_instrucciones
+
+    '\n'  desplazar e ir al estado 127
+
+
+Estado 121
+
+    2 programa: zona_variables zona_sensores zona_actuadores zona_estados zona_transiciones zona_comportamiento zona_casos_uso zona_ejemplos .
+
+    $default  reduce usando la regla 2 (programa)
+
+
+Estado 122
+
+   58 zona_transiciones_instrucciones: zona_transiciones_instrucciones error '\n' .
+
+    $default  reduce usando la regla 58 (zona_transiciones_instrucciones)
+
+
+Estado 123
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID ':' . ID ASIGNACION ID '\n'
+
+    ID  desplazar e ir al estado 128
+
+
+Estado 124
+
+   70 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 129
+
+
+Estado 125
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID . $@1 INICIOLLAVES '\n' comportamiento2 FINLLAVES '\n'
+
+    $default  reduce usando la regla 68 ($@1)
+
+    $@1  ir al estado 130
+
+
+Estado 126
+
+   59 zona_casos_uso: CASOSUSO '\n' zona_casos_uso_instrucciones .
+   62 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones . CASO ID ':' caso_uso2
+   63                             | zona_casos_uso_instrucciones . error '\n'
+
+    error  desplazar e ir al estado 131
+    CASO   desplazar e ir al estado 132
+
+    $end      reduce usando la regla 59 (zona_casos_uso)
+    EJEMPLOS  reduce usando la regla 59 (zona_casos_uso)
+
+
+Estado 127
+
+   83 zona_ejemplos: EJEMPLOS '\n' . zona_ejemplos_instrucciones
+
+    $default  reduce usando la regla 85 (zona_ejemplos_instrucciones)
+
+    zona_ejemplos_instrucciones  ir al estado 133
+
+
+Estado 128
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID ':' ID . ASIGNACION ID '\n'
+
+    ASIGNACION  desplazar e ir al estado 134
+
+
+Estado 129
+
+   70 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones error '\n' .
+
+    $default  reduce usando la regla 70 (zona_comportamiento_instrucciones)
+
+
+Estado 130
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 . INICIOLLAVES '\n' comportamiento2 FINLLAVES '\n'
+
+    INICIOLLAVES  desplazar e ir al estado 135
+
+
+Estado 131
+
+   63 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 136
+
+
+Estado 132
+
+   62 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones CASO . ID ':' caso_uso2
+
+    ID  desplazar e ir al estado 137
+
+
+Estado 133
+
+   83 zona_ejemplos: EJEMPLOS '\n' zona_ejemplos_instrucciones .
+   86 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones . EJEMPLO ID '\n' ejemplos2
+   87                            | zona_ejemplos_instrucciones . error '\n'
+
+    error    desplazar e ir al estado 138
+    EJEMPLO  desplazar e ir al estado 139
+
+    $end  reduce usando la regla 83 (zona_ejemplos)
+
+
+Estado 134
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID ':' ID ASIGNACION . ID '\n'
+
+    ID  desplazar e ir al estado 140
+
+
+Estado 135
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES . '\n' comportamiento2 FINLLAVES '\n'
+
+    '\n'  desplazar e ir al estado 141
+
+
+Estado 136
+
+   63 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones error '\n' .
+
+    $default  reduce usando la regla 63 (zona_casos_uso_instrucciones)
+
+
+Estado 137
+
+   62 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones CASO ID . ':' caso_uso2
+
+    ':'  desplazar e ir al estado 142
+
+
+Estado 138
+
+   87 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones error . '\n'
+
+    '\n'  desplazar e ir al estado 143
+
+
+Estado 139
+
+   86 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones EJEMPLO . ID '\n' ejemplos2
+
+    ID  desplazar e ir al estado 144
+
+
+Estado 140
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID ':' ID ASIGNACION ID . '\n'
+
+    '\n'  desplazar e ir al estado 145
+
+
+Estado 141
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES '\n' . comportamiento2 FINLLAVES '\n'
+
+    $default  reduce usando la regla 77 (comportamiento2)
+
+    comportamiento2  ir al estado 146
+
+
+Estado 142
+
+   62 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones CASO ID ':' . caso_uso2
+
+    ID  desplazar e ir al estado 147
+
+    caso_uso2  ir al estado 148
+
+
+Estado 143
+
+   87 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones error '\n' .
+
+    $default  reduce usando la regla 87 (zona_ejemplos_instrucciones)
+
+
+Estado 144
+
+   86 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones EJEMPLO ID . '\n' ejemplos2
+
+    '\n'  desplazar e ir al estado 149
+
+
+Estado 145
+
+   57 zona_transiciones_instrucciones: zona_transiciones_instrucciones ID ':' ID ASIGNACION ID '\n' .
+
+    $default  reduce usando la regla 57 (zona_transiciones_instrucciones)
+
+
+Estado 146
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES '\n' comportamiento2 . FINLLAVES '\n'
+   72 comportamiento2: comportamiento2 . SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+   73                | comportamiento2 . ACTIVAR ID '\n'
+   74                | comportamiento2 . DESACTIVAR ID '\n'
+   75                | comportamiento2 . TRANSICION ID '\n'
+   76                | comportamiento2 . operacion_asignacion_arbol
+   78                | comportamiento2 . error '\n'
+
+    error       desplazar e ir al estado 150
+    ID          desplazar e ir al estado 151
+    SI          desplazar e ir al estado 152
+    ACTIVAR     desplazar e ir al estado 153
+    DESACTIVAR  desplazar e ir al estado 154
+    TRANSICION  desplazar e ir al estado 155
+    FINLLAVES   desplazar e ir al estado 156
+
+    operacion_asignacion_arbol  ir al estado 157
+
+
+Estado 147
+
+   64 caso_uso2: ID . '\n'
+   65          | ID . ';' caso_uso2
+
+    '\n'  desplazar e ir al estado 158
+    ';'   desplazar e ir al estado 159
+
+
+Estado 148
+
+   62 zona_casos_uso_instrucciones: zona_casos_uso_instrucciones CASO ID ':' caso_uso2 .
+
+    $default  reduce usando la regla 62 (zona_casos_uso_instrucciones)
+
+
+Estado 149
+
+   86 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones EJEMPLO ID '\n' . ejemplos2
+
+    $default  reduce usando la regla 88 (ejemplos2)
+
+    ejemplos2  ir al estado 160
+
+
+Estado 150
+
+   78 comportamiento2: comportamiento2 error . '\n'
+
+    '\n'  desplazar e ir al estado 161
+
+
+Estado 151
+
+   92 operacion_asignacion_arbol: ID . '=' expr_arbol '\n'
+   93                           | ID . '=' exprLogica_arbol '\n'
+
+    '='  desplazar e ir al estado 162
+
+
+Estado 152
+
+   72 comportamiento2: comportamiento2 SI . exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 171
+    expr_arbol        ir al estado 172
+
+
+Estado 153
+
+   73 comportamiento2: comportamiento2 ACTIVAR . ID '\n'
+
+    ID  desplazar e ir al estado 173
+
+
+Estado 154
+
+   74 comportamiento2: comportamiento2 DESACTIVAR . ID '\n'
+
+    ID  desplazar e ir al estado 174
+
+
+Estado 155
+
+   75 comportamiento2: comportamiento2 TRANSICION . ID '\n'
+
+    ID  desplazar e ir al estado 175
+
+
+Estado 156
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES '\n' comportamiento2 FINLLAVES . '\n'
+
+    '\n'  desplazar e ir al estado 176
+
+
+Estado 157
+
+   76 comportamiento2: comportamiento2 operacion_asignacion_arbol .
+
+    $default  reduce usando la regla 76 (comportamiento2)
+
+
+Estado 158
+
+   64 caso_uso2: ID '\n' .
+
+    $default  reduce usando la regla 64 (caso_uso2)
+
+
+Estado 159
+
+   65 caso_uso2: ID ';' . caso_uso2
+
+    ID  desplazar e ir al estado 147
+
+    caso_uso2  ir al estado 177
+
+
+Estado 160
+
+   86 zona_ejemplos_instrucciones: zona_ejemplos_instrucciones EJEMPLO ID '\n' ejemplos2 .
+   89 ejemplos2: ejemplos2 . ID LOGICA '\n'
+   90          | ejemplos2 . ID NUMERO '\n'
+   91          | ejemplos2 . ID REAL '\n'
+
+    ID  desplazar e ir al estado 178
+
+    $default  reduce usando la regla 86 (zona_ejemplos_instrucciones)
+
+
+Estado 161
+
+   78 comportamiento2: comportamiento2 error '\n' .
+
+    $default  reduce usando la regla 78 (comportamiento2)
+
+
+Estado 162
+
+   92 operacion_asignacion_arbol: ID '=' . expr_arbol '\n'
+   93                           | ID '=' . exprLogica_arbol '\n'
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 179
+    expr_arbol        ir al estado 180
+
+
+Estado 163
+
+  109 expr_arbol: NUMERO .
+
+    $default  reduce usando la regla 109 (expr_arbol)
+
+
+Estado 164
+
+  108 expr_arbol: REAL .
+
+    $default  reduce usando la regla 108 (expr_arbol)
+
+
+Estado 165
+
+  110 expr_arbol: ID .
+
+    $default  reduce usando la regla 110 (expr_arbol)
+
+
+Estado 166
+
+   94 exprLogica_arbol: LOGICA .
+
+    $default  reduce usando la regla 94 (exprLogica_arbol)
+
+
+Estado 167
+
+  106 exprLogica_arbol: S_NOT . exprLogica_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 181
+    expr_arbol        ir al estado 172
+
+
+Estado 168
+
+  118 expr_arbol: '+' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 183
+
+
+Estado 169
+
+  119 expr_arbol: '-' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 184
+
+
+Estado 170
+
+  105 exprLogica_arbol: '(' . exprLogica_arbol ')'
+  117 expr_arbol: '(' . expr_arbol ')'
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 185
+    expr_arbol        ir al estado 186
+
+
+Estado 171
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol . INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+
+    INICIOLLAVES  desplazar e ir al estado 187
+    S_IGUAL       desplazar e ir al estado 188
+    S_DISTINTO    desplazar e ir al estado 189
+    S_AND         desplazar e ir al estado 190
+    S_OR          desplazar e ir al estado 191
+
+
+Estado 172
+
+   95 exprLogica_arbol: expr_arbol . S_MENOR expr_arbol
+   96                 | expr_arbol . S_MENORIGUAL expr_arbol
+   97                 | expr_arbol . S_MAYOR expr_arbol
+   98                 | expr_arbol . S_MAYORIGUAL expr_arbol
+   99                 | expr_arbol . S_IGUAL expr_arbol
+  100                 | expr_arbol . S_DISTINTO expr_arbol
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    S_MENORIGUAL  desplazar e ir al estado 192
+    S_MAYORIGUAL  desplazar e ir al estado 193
+    S_MENOR       desplazar e ir al estado 194
+    S_MAYOR       desplazar e ir al estado 195
+    S_IGUAL       desplazar e ir al estado 196
+    S_DISTINTO    desplazar e ir al estado 197
+    '+'           desplazar e ir al estado 198
+    '-'           desplazar e ir al estado 199
+    '*'           desplazar e ir al estado 200
+    '/'           desplazar e ir al estado 201
+    '%'           desplazar e ir al estado 202
+    '^'           desplazar e ir al estado 203
+
+
+Estado 173
+
+   73 comportamiento2: comportamiento2 ACTIVAR ID . '\n'
+
+    '\n'  desplazar e ir al estado 204
+
+
+Estado 174
+
+   74 comportamiento2: comportamiento2 DESACTIVAR ID . '\n'
+
+    '\n'  desplazar e ir al estado 205
+
+
+Estado 175
+
+   75 comportamiento2: comportamiento2 TRANSICION ID . '\n'
+
+    '\n'  desplazar e ir al estado 206
+
+
+Estado 176
+
+   69 zona_comportamiento_instrucciones: zona_comportamiento_instrucciones ID $@1 INICIOLLAVES '\n' comportamiento2 FINLLAVES '\n' .
+
+    $default  reduce usando la regla 69 (zona_comportamiento_instrucciones)
+
+
+Estado 177
+
+   65 caso_uso2: ID ';' caso_uso2 .
+
+    $default  reduce usando la regla 65 (caso_uso2)
+
+
+Estado 178
+
+   89 ejemplos2: ejemplos2 ID . LOGICA '\n'
+   90          | ejemplos2 ID . NUMERO '\n'
+   91          | ejemplos2 ID . REAL '\n'
+
+    NUMERO  desplazar e ir al estado 207
+    REAL    desplazar e ir al estado 208
+    LOGICA  desplazar e ir al estado 209
+
+
+Estado 179
+
+   93 operacion_asignacion_arbol: ID '=' exprLogica_arbol . '\n'
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+
+    S_IGUAL     desplazar e ir al estado 188
+    S_DISTINTO  desplazar e ir al estado 189
+    S_AND       desplazar e ir al estado 190
+    S_OR        desplazar e ir al estado 191
+    '\n'        desplazar e ir al estado 210
+
+
+Estado 180
+
+   92 operacion_asignacion_arbol: ID '=' expr_arbol . '\n'
+   95 exprLogica_arbol: expr_arbol . S_MENOR expr_arbol
+   96                 | expr_arbol . S_MENORIGUAL expr_arbol
+   97                 | expr_arbol . S_MAYOR expr_arbol
+   98                 | expr_arbol . S_MAYORIGUAL expr_arbol
+   99                 | expr_arbol . S_IGUAL expr_arbol
+  100                 | expr_arbol . S_DISTINTO expr_arbol
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    S_MENORIGUAL  desplazar e ir al estado 192
+    S_MAYORIGUAL  desplazar e ir al estado 193
+    S_MENOR       desplazar e ir al estado 194
+    S_MAYOR       desplazar e ir al estado 195
+    S_IGUAL       desplazar e ir al estado 196
+    S_DISTINTO    desplazar e ir al estado 197
+    '+'           desplazar e ir al estado 198
+    '-'           desplazar e ir al estado 199
+    '*'           desplazar e ir al estado 200
+    '/'           desplazar e ir al estado 201
+    '%'           desplazar e ir al estado 202
+    '^'           desplazar e ir al estado 203
+    '\n'          desplazar e ir al estado 211
+
+
+Estado 181
+
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+  106                 | S_NOT exprLogica_arbol .
+
+    $default  reduce usando la regla 106 (exprLogica_arbol)
+
+
+Estado 182
+
+  117 expr_arbol: '(' . expr_arbol ')'
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 212
+
+
+Estado 183
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+  118           | '+' expr_arbol .
+
+    $default  reduce usando la regla 118 (expr_arbol)
+
+
+Estado 184
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+  119           | '-' expr_arbol .
+
+    $default  reduce usando la regla 119 (expr_arbol)
+
+
+Estado 185
+
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+  105                 | '(' exprLogica_arbol . ')'
+
+    S_IGUAL     desplazar e ir al estado 188
+    S_DISTINTO  desplazar e ir al estado 189
+    S_AND       desplazar e ir al estado 190
+    S_OR        desplazar e ir al estado 191
+    ')'         desplazar e ir al estado 213
+
+
+Estado 186
+
+   95 exprLogica_arbol: expr_arbol . S_MENOR expr_arbol
+   96                 | expr_arbol . S_MENORIGUAL expr_arbol
+   97                 | expr_arbol . S_MAYOR expr_arbol
+   98                 | expr_arbol . S_MAYORIGUAL expr_arbol
+   99                 | expr_arbol . S_IGUAL expr_arbol
+  100                 | expr_arbol . S_DISTINTO expr_arbol
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+  117           | '(' expr_arbol . ')'
+
+    S_MENORIGUAL  desplazar e ir al estado 192
+    S_MAYORIGUAL  desplazar e ir al estado 193
+    S_MENOR       desplazar e ir al estado 194
+    S_MAYOR       desplazar e ir al estado 195
+    S_IGUAL       desplazar e ir al estado 196
+    S_DISTINTO    desplazar e ir al estado 197
+    '+'           desplazar e ir al estado 198
+    '-'           desplazar e ir al estado 199
+    '*'           desplazar e ir al estado 200
+    '/'           desplazar e ir al estado 201
+    '%'           desplazar e ir al estado 202
+    '^'           desplazar e ir al estado 203
+    ')'           desplazar e ir al estado 214
+
+
+Estado 187
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES . $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+
+    $default  reduce usando la regla 71 ($@2)
+
+    $@2  ir al estado 215
+
+
+Estado 188
+
+  101 exprLogica_arbol: exprLogica_arbol S_IGUAL . id_logica_arbol
+
+    ID  desplazar e ir al estado 216
+
+    id_logica_arbol  ir al estado 217
+
+
+Estado 189
+
+  102 exprLogica_arbol: exprLogica_arbol S_DISTINTO . id_logica_arbol
+
+    ID  desplazar e ir al estado 216
+
+    id_logica_arbol  ir al estado 218
+
+
+Estado 190
+
+  104 exprLogica_arbol: exprLogica_arbol S_AND . exprLogica_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 219
+    expr_arbol        ir al estado 172
+
+
+Estado 191
+
+  103 exprLogica_arbol: exprLogica_arbol S_OR . exprLogica_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    LOGICA  desplazar e ir al estado 166
+    S_NOT   desplazar e ir al estado 167
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 170
+
+    exprLogica_arbol  ir al estado 220
+    expr_arbol        ir al estado 172
+
+
+Estado 192
+
+   96 exprLogica_arbol: expr_arbol S_MENORIGUAL . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 221
+
+
+Estado 193
+
+   98 exprLogica_arbol: expr_arbol S_MAYORIGUAL . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 222
+
+
+Estado 194
+
+   95 exprLogica_arbol: expr_arbol S_MENOR . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 223
+
+
+Estado 195
+
+   97 exprLogica_arbol: expr_arbol S_MAYOR . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 224
+
+
+Estado 196
+
+   99 exprLogica_arbol: expr_arbol S_IGUAL . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 225
+
+
+Estado 197
+
+  100 exprLogica_arbol: expr_arbol S_DISTINTO . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 226
+
+
+Estado 198
+
+  111 expr_arbol: expr_arbol '+' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 227
+
+
+Estado 199
+
+  112 expr_arbol: expr_arbol '-' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 228
+
+
+Estado 200
+
+  113 expr_arbol: expr_arbol '*' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 229
+
+
+Estado 201
+
+  114 expr_arbol: expr_arbol '/' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 230
+
+
+Estado 202
+
+  115 expr_arbol: expr_arbol '%' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 231
+
+
+Estado 203
+
+  116 expr_arbol: expr_arbol '^' . expr_arbol
+
+    NUMERO  desplazar e ir al estado 163
+    REAL    desplazar e ir al estado 164
+    ID      desplazar e ir al estado 165
+    '+'     desplazar e ir al estado 168
+    '-'     desplazar e ir al estado 169
+    '('     desplazar e ir al estado 182
+
+    expr_arbol  ir al estado 232
+
+
+Estado 204
+
+   73 comportamiento2: comportamiento2 ACTIVAR ID '\n' .
+
+    $default  reduce usando la regla 73 (comportamiento2)
+
+
+Estado 205
+
+   74 comportamiento2: comportamiento2 DESACTIVAR ID '\n' .
+
+    $default  reduce usando la regla 74 (comportamiento2)
+
+
+Estado 206
+
+   75 comportamiento2: comportamiento2 TRANSICION ID '\n' .
+
+    $default  reduce usando la regla 75 (comportamiento2)
+
+
+Estado 207
+
+   90 ejemplos2: ejemplos2 ID NUMERO . '\n'
+
+    '\n'  desplazar e ir al estado 233
+
+
+Estado 208
+
+   91 ejemplos2: ejemplos2 ID REAL . '\n'
+
+    '\n'  desplazar e ir al estado 234
+
+
+Estado 209
+
+   89 ejemplos2: ejemplos2 ID LOGICA . '\n'
+
+    '\n'  desplazar e ir al estado 235
+
+
+Estado 210
+
+   93 operacion_asignacion_arbol: ID '=' exprLogica_arbol '\n' .
+
+    $default  reduce usando la regla 93 (operacion_asignacion_arbol)
+
+
+Estado 211
+
+   92 operacion_asignacion_arbol: ID '=' expr_arbol '\n' .
+
+    $default  reduce usando la regla 92 (operacion_asignacion_arbol)
+
+
+Estado 212
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+  117           | '(' expr_arbol . ')'
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+    ')'  desplazar e ir al estado 214
+
+
+Estado 213
+
+  105 exprLogica_arbol: '(' exprLogica_arbol ')' .
+
+    $default  reduce usando la regla 105 (exprLogica_arbol)
+
+
+Estado 214
+
+  117 expr_arbol: '(' expr_arbol ')' .
+
+    $default  reduce usando la regla 117 (expr_arbol)
+
+
+Estado 215
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 . '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+
+    '\n'  desplazar e ir al estado 236
+
+
+Estado 216
+
+  107 id_logica_arbol: ID .
+
+    $default  reduce usando la regla 107 (id_logica_arbol)
+
+
+Estado 217
+
+  101 exprLogica_arbol: exprLogica_arbol S_IGUAL id_logica_arbol .
+
+    $default  reduce usando la regla 101 (exprLogica_arbol)
+
+
+Estado 218
+
+  102 exprLogica_arbol: exprLogica_arbol S_DISTINTO id_logica_arbol .
+
+    $default  reduce usando la regla 102 (exprLogica_arbol)
+
+
+Estado 219
+
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+  104                 | exprLogica_arbol S_AND exprLogica_arbol .
+
+    $default  reduce usando la regla 104 (exprLogica_arbol)
+
+
+Estado 220
+
+  101 exprLogica_arbol: exprLogica_arbol . S_IGUAL id_logica_arbol
+  102                 | exprLogica_arbol . S_DISTINTO id_logica_arbol
+  103                 | exprLogica_arbol . S_OR exprLogica_arbol
+  103                 | exprLogica_arbol S_OR exprLogica_arbol .
+  104                 | exprLogica_arbol . S_AND exprLogica_arbol
+
+    S_AND  desplazar e ir al estado 190
+
+    $default  reduce usando la regla 103 (exprLogica_arbol)
+
+
+Estado 221
+
+   96 exprLogica_arbol: expr_arbol S_MENORIGUAL expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 96 (exprLogica_arbol)
+
+
+Estado 222
+
+   98 exprLogica_arbol: expr_arbol S_MAYORIGUAL expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 98 (exprLogica_arbol)
+
+
+Estado 223
+
+   95 exprLogica_arbol: expr_arbol S_MENOR expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 95 (exprLogica_arbol)
+
+
+Estado 224
+
+   97 exprLogica_arbol: expr_arbol S_MAYOR expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 97 (exprLogica_arbol)
+
+
+Estado 225
+
+   99 exprLogica_arbol: expr_arbol S_IGUAL expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 99 (exprLogica_arbol)
+
+
+Estado 226
+
+  100 exprLogica_arbol: expr_arbol S_DISTINTO expr_arbol .
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '+'  desplazar e ir al estado 198
+    '-'  desplazar e ir al estado 199
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 100 (exprLogica_arbol)
+
+
+Estado 227
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  111           | expr_arbol '+' expr_arbol .
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 111 (expr_arbol)
+
+
+Estado 228
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  112           | expr_arbol '-' expr_arbol .
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '*'  desplazar e ir al estado 200
+    '/'  desplazar e ir al estado 201
+    '%'  desplazar e ir al estado 202
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 112 (expr_arbol)
+
+
+Estado 229
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  113           | expr_arbol '*' expr_arbol .
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 113 (expr_arbol)
+
+
+Estado 230
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  114           | expr_arbol '/' expr_arbol .
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 114 (expr_arbol)
+
+
+Estado 231
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  115           | expr_arbol '%' expr_arbol .
+  116           | expr_arbol . '^' expr_arbol
+
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 115 (expr_arbol)
+
+
+Estado 232
+
+  111 expr_arbol: expr_arbol . '+' expr_arbol
+  112           | expr_arbol . '-' expr_arbol
+  113           | expr_arbol . '*' expr_arbol
+  114           | expr_arbol . '/' expr_arbol
+  115           | expr_arbol . '%' expr_arbol
+  116           | expr_arbol . '^' expr_arbol
+  116           | expr_arbol '^' expr_arbol .
+
+    '^'  desplazar e ir al estado 203
+
+    $default  reduce usando la regla 116 (expr_arbol)
+
+
+Estado 233
+
+   90 ejemplos2: ejemplos2 ID NUMERO '\n' .
+
+    $default  reduce usando la regla 90 (ejemplos2)
+
+
+Estado 234
+
+   91 ejemplos2: ejemplos2 ID REAL '\n' .
+
+    $default  reduce usando la regla 91 (ejemplos2)
+
+
+Estado 235
+
+   89 ejemplos2: ejemplos2 ID LOGICA '\n' .
+
+    $default  reduce usando la regla 89 (ejemplos2)
+
+
+Estado 236
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' . comportamiento2 FINLLAVES '\n' comportamiento3
+
+    $default  reduce usando la regla 77 (comportamiento2)
+
+    comportamiento2  ir al estado 237
+
+
+Estado 237
+
+   72 comportamiento2: comportamiento2 . SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+   72                | comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 . FINLLAVES '\n' comportamiento3
+   73                | comportamiento2 . ACTIVAR ID '\n'
+   74                | comportamiento2 . DESACTIVAR ID '\n'
+   75                | comportamiento2 . TRANSICION ID '\n'
+   76                | comportamiento2 . operacion_asignacion_arbol
+   78                | comportamiento2 . error '\n'
+
+    error       desplazar e ir al estado 150
+    ID          desplazar e ir al estado 151
+    SI          desplazar e ir al estado 152
+    ACTIVAR     desplazar e ir al estado 153
+    DESACTIVAR  desplazar e ir al estado 154
+    TRANSICION  desplazar e ir al estado 155
+    FINLLAVES   desplazar e ir al estado 238
+
+    operacion_asignacion_arbol  ir al estado 157
+
+
+Estado 238
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES . '\n' comportamiento3
+
+    '\n'  desplazar e ir al estado 239
+
+
+Estado 239
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' . comportamiento3
+
+    SINO  desplazar e ir al estado 240
+
+    $default  reduce usando la regla 79 (comportamiento3)
+
+    comportamiento3  ir al estado 241
+
+
+Estado 240
+
+   81 comportamiento3: SINO . INICIOLLAVES $@3 '\n' comportamiento2 FINLLAVES '\n'
+   82                | SINO . error
+
+    error         desplazar e ir al estado 242
+    INICIOLLAVES  desplazar e ir al estado 243
+
+
+Estado 241
+
+   72 comportamiento2: comportamiento2 SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3 .
+
+    $default  reduce usando la regla 72 (comportamiento2)
+
+
+Estado 242
+
+   82 comportamiento3: SINO error .
+
+    $default  reduce usando la regla 82 (comportamiento3)
+
+
+Estado 243
+
+   81 comportamiento3: SINO INICIOLLAVES . $@3 '\n' comportamiento2 FINLLAVES '\n'
+
+    $default  reduce usando la regla 80 ($@3)
+
+    $@3  ir al estado 244
+
+
+Estado 244
+
+   81 comportamiento3: SINO INICIOLLAVES $@3 . '\n' comportamiento2 FINLLAVES '\n'
+
+    '\n'  desplazar e ir al estado 245
+
+
+Estado 245
+
+   81 comportamiento3: SINO INICIOLLAVES $@3 '\n' . comportamiento2 FINLLAVES '\n'
+
+    $default  reduce usando la regla 77 (comportamiento2)
+
+    comportamiento2  ir al estado 246
+
+
+Estado 246
+
+   72 comportamiento2: comportamiento2 . SI exprLogica_arbol INICIOLLAVES $@2 '\n' comportamiento2 FINLLAVES '\n' comportamiento3
+   73                | comportamiento2 . ACTIVAR ID '\n'
+   74                | comportamiento2 . DESACTIVAR ID '\n'
+   75                | comportamiento2 . TRANSICION ID '\n'
+   76                | comportamiento2 . operacion_asignacion_arbol
+   78                | comportamiento2 . error '\n'
+   81 comportamiento3: SINO INICIOLLAVES $@3 '\n' comportamiento2 . FINLLAVES '\n'
+
+    error       desplazar e ir al estado 150
+    ID          desplazar e ir al estado 151
+    SI          desplazar e ir al estado 152
+    ACTIVAR     desplazar e ir al estado 153
+    DESACTIVAR  desplazar e ir al estado 154
+    TRANSICION  desplazar e ir al estado 155
+    FINLLAVES   desplazar e ir al estado 247
+
+    operacion_asignacion_arbol  ir al estado 157
+
+
+Estado 247
+
+   81 comportamiento3: SINO INICIOLLAVES $@3 '\n' comportamiento2 FINLLAVES . '\n'
+
+    '\n'  desplazar e ir al estado 248
+
+
+Estado 248
+
+   81 comportamiento3: SINO INICIOLLAVES $@3 '\n' comportamiento2 FINLLAVES '\n' .
+
+    $default  reduce usando la regla 81 (comportamiento3)
